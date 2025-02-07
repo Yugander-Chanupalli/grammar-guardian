@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -245,7 +245,7 @@
       </div>
     {% endif %}
   
-    <!-- Add this after the results section -->
+    Add this after the results section 
     {% if chat_history %}
       <div class="results" style="margin-top: 2rem;">
         <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: #8b5cf6;">
@@ -294,5 +294,208 @@
     });
   </script>
 </body>
-</html>
+</html> -->
 
+
+<!-- Updated code start -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grammar Guardian | AI-Powered Writing Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary-color: #6366f1;
+      --success-color: #10b981;
+      --error-color: #ef4444;
+      --background: #0f172a;
+      --surface: #1e293b;
+      --text-primary: #f8fafc;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body { background: var(--background); color: var(--text-primary); min-height: 100vh; padding: 2rem; }
+    .container { max-width: 800px; margin: 0 auto; animation: fadeIn 0.5s ease; }
+    .header { text-align: center; margin-bottom: 2rem; }
+    .header h1 { font-size: 2.5rem; font-weight: 600; background: linear-gradient(45deg, #8b5cf6, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+    .header p { color: #94a3b8; font-size: 1.1rem; }
+    .editor-container { background: var(--surface); border-radius: 1rem; padding: 2rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.1); }
+    textarea { width: 100%; min-height: 200px; padding: 1.5rem; background: #334155; border: none; border-radius: 0.75rem; color: var(--text-primary); font-size: 1.1rem; line-height: 1.6; resize: vertical; transition: all 0.3s ease; }
+    textarea:focus { outline: none; box-shadow: 0 0 0 2px var(--primary-color); }
+    button { background: var(--primary-color); color: white; border: none; padding: 1rem 2rem; border-radius: 0.75rem; font-size: 1.1rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; margin-top: 1.5rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    button:hover { opacity: 0.9; transform: translateY(-2px); }
+    button i { font-size: 1.2rem; }
+    .results { background: var(--surface); border-radius: 1rem; padding: 2rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); margin-bottom: 2rem; }
+    .error-card { background: #1e293b; border-left: 4px solid var(--error-color); padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 0.5rem; animation: slideIn 0.3s ease; }
+    .error-card h3 { color: var(--error-color); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .suggestion { color: var(--success-color); margin-top: 0.5rem; font-weight: 500; }
+    .context { background: #334155; padding: 0.5rem 1rem; border-radius: 0.5rem; margin: 1rem 0; font-family: monospace; }
+    .stats { display: flex; gap: 2rem; margin-bottom: 1.5rem; color: #94a3b8; }
+    .loading { text-align: center; padding: 2rem; display: none; }
+    .success-message { text-align: center; padding: 2rem; color: var(--success-color); font-size: 1.2rem; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    @media (max-width: 768px) { body { padding: 1rem; } .container { width: 100%; } }
+    /* Container for displaying chat history from localStorage */
+    #chatHistoryContainer { margin-top: 2rem; }
+    #chatHistoryContainer h2 { font-size: 1.5rem; margin-bottom: 1.5rem; color: #8b5cf6; }
+    #chatHistoryContainer .entry { background: var(--surface); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Grammar Guardian</h1>
+      <p>AI-powered writing assistant to perfect your text</p>
+    </div>
+
+    <div class="editor-container">
+      <form method="post">
+        <textarea name="text" placeholder="Paste your text here...">{{ input_text }}</textarea>
+        <button type="submit">
+          <i class="fas fa-magic"></i> Analyze Text
+        </button>
+      </form>
+    </div>
+
+    {% if result %}
+      <div class="results">
+        {% if result.error %}
+          <div class="error-card">
+            <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
+            <p>{{ result.error }}</p>
+          </div>
+        {% else %}
+          <div class="stats">
+            {% if result.responseTime %}
+              <div><i class="fas fa-clock"></i> {{ result.responseTime }}ms</div>
+            {% endif %}
+            <div><i class="fas fa-bug"></i> {{ result.matches|length }} issues found</div>
+          </div>
+          {% if result.matches and result.matches|length > 0 %}
+            {% for error in result.matches %}
+              <div class="error-card">
+                <h3><i class="fas fa-exclamation-circle"></i> {{ error.rule.category }}</h3>
+                <p>{{ error.message }}</p>
+                {% if error.replacements and error.replacements|length > 0 %}
+                  <p class="suggestion">
+                    <i class="fas fa-lightbulb"></i> Suggestion: {{ error.replacements[0].value or error.replacements[0] }}
+                  </p>
+                {% endif %}
+                <div class="context">
+                  "{{ error.context.text }}"
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="success-message">
+              <i class="fas fa-check-circle"></i> Perfect! No errors found in your text.
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+    
+    <!-- Chat History will be displayed here from localStorage -->
+    <div id="chatHistoryContainer">
+      <h2><i class="fas fa-history"></i> Chat History</h2>
+      <!-- History entries will be inserted here by JavaScript -->
+    </div>
+  </div>
+
+  <script>
+    // The server sends a JSON string in the variable history_entry.
+    // It will either be an empty list (if no new entry) or a list with one new entry.
+    let serverChatHistory = {{ history_entry | safe }};
+    
+    // Retrieve any existing history from localStorage
+    let localChatHistory = JSON.parse(localStorage.getItem("chat_history")) || [];
+    
+    // If a new entry was just added on the server, merge it into localStorage.
+    if (serverChatHistory.length > 0) {
+      // (Optional) Avoid duplicates by checking timestamps or input_text.
+      // For simplicity, we unshift the new entry.
+      localChatHistory.unshift(...serverChatHistory);
+      // Limit history to the latest 10 entries.
+      localChatHistory = localChatHistory.slice(0, 10);
+      localStorage.setItem("chat_history", JSON.stringify(localChatHistory));
+    }
+    
+    // Function to display the chat history from localStorage.
+    function displayChatHistory() {
+      let container = document.getElementById("chatHistoryContainer");
+      // Clear out the container and re-add the heading.
+      container.innerHTML = '<h2><i class="fas fa-history"></i> Chat History</h2>';
+      
+      localChatHistory.forEach(entry => {
+        let div = document.createElement("div");
+        div.classList.add("entry");
+        // Only display the necessary fields rather than the complete JSON.
+        div.innerHTML = `<strong>Input:</strong> ${entry.input_text}<br>
+                         <strong>Errors Found:</strong> ${entry.error_count}<br>
+                         ${entry.errors.length > 0 ? '<strong>Error Details:</strong> ' + entry.errors.map(error => 
+                            `<div>
+                              Category: ${error.category.name} (${error.category.id})<br>
+                              Message: ${error.message}<br>
+                              Suggestion: ${error.suggestion || 'N/A'}<br>
+                              Context: ${error.context}
+                            </div><br>`).join('') : '<em>No errors found</em>'}`;
+        container.appendChild(div);
+      });
+    }
+    
+    // On page load, display the stored chat history.
+    displayChatHistory();
+  </script>
+  <script>
+    // Modified displayChatHistory function with enhanced UI formatting (if desired)
+    function displayChatHistory() {
+      let container = document.getElementById("chatHistoryContainer");
+      container.innerHTML = '<h2><i class="fas fa-history"></i> Chat History</h2>';
+      
+      localChatHistory.forEach(entry => {
+        let entryDiv = document.createElement("div");
+        entryDiv.className = "history-entry";
+        
+        let html = `
+          <div class="history-header">
+            <span class="timestamp">${new Date(entry.timestamp).toLocaleString()}</span>
+            <span class="error-count">${entry.error_count || 0} errors</span>
+          </div>
+          <div class="original-input">"${entry.input_text}"</div>`;
+        
+        if (entry.error) {
+          html += `<div class="error-message">Error: ${entry.error}</div>`;
+        } else if (entry.errors && entry.errors.length > 0) {
+          html += '<div class="error-list">';
+          entry.errors.forEach(error => {
+            html += `
+              <div class="error-item">
+                <div class="error-category">
+                  <span class="category-id">${error.category.id}</span>
+                  <span class="category-name">${error.category.name}</span>
+                </div>
+                <div class="error-message">${error.message}</div>
+                ${error.suggestion ? `
+                  <div class="suggestion">
+                    <i class="fas fa-lightbulb"></i>
+                    Suggested correction: ${error.suggestion}
+                  </div>` : ''}
+                <div class="context">Context: "${error.context}"</div>
+              </div>`;
+          });
+          html += '</div>';
+        } else {
+          html += '<div class="success-message">No errors found</div>';
+        }
+        
+        entryDiv.innerHTML = html;
+        container.appendChild(entryDiv);
+      });
+    }
+  </script>
+</body>
+</html>
+<!-- Updated code -->

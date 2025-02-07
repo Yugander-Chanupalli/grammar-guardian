@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Names and Ages</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #dataList { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h2>Enter Name and Age</h2>
+    <input type="text" id="name" placeholder="Enter Name">
+    <input type="number" id="age" placeholder="Enter Age">
+    <button onclick="storeData()">Submit</button>
+    
+    <h3>Stored Data</h3>
+    <ul id="dataList"></ul>
+    
+    <script>
+        function storeData() {
+            let name = document.getElementById("name").value;
+            let age = document.getElementById("age").value;
+            if (name === "" || age === "") {
+                alert("Please enter both name and age");
+                return;
+            }
+            
+            let users = JSON.parse(localStorage.getItem("users")) || [];
+            users.push({ name, age });
+            localStorage.setItem("users", JSON.stringify(users));
+            displayData();
+        }
+        
+        function displayData() {
+            let dataList = document.getElementById("dataList");
+            dataList.innerHTML = "";
+            let users = JSON.parse(localStorage.getItem("users")) || [];
+            users.forEach(user => {
+                let li = document.createElement("li");
+                li.textContent = ${user.name} - ${user.age} years old;
+                dataList.appendChild(li);
+            });
+        }
+        
+        window.onload = displayData;
+    </script>
+</body>
+</html>
